@@ -59,7 +59,7 @@ class MessageButton extends BaseMessageComponent {
     }
 
     setEmoji(emoji, animated = false) {
-        if (typeof emoji == String) {
+        if (typeof emoji == 'string') {
             if (isEmoji(emoji)) {
                 this.emoji = { name: emoji };
             } else if (emoji.length > 0) {
@@ -67,10 +67,10 @@ class MessageButton extends BaseMessageComponent {
             } else {
                 throw new TypeError('INVALID_EMOJI')
             }
-        } else if (typeof emoji == Object) {
-            if (typeof emoji?.name == String && isEmoji(emoji.name)) {
+        } else if (typeof emoji == 'object') {
+            if (typeof emoji?.name == 'string' && isEmoji(emoji.name)) {
                 this.emoji = { name: emoji.name };
-            } else if (typeof emoji?.id == String && emoji.id.length > 0) {
+            } else if (typeof emoji?.id == 'string' && emoji.id.length > 0) {
                 this.emoji = { id: emoji.id, animated: Boolean(emoji?.animated) };
             } else {
                 throw new TypeError('INVALID_EMOJI')
