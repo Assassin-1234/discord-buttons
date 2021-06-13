@@ -1,7 +1,8 @@
-const { Structures } = require("discord.js");
+const NewsChannel = require('discord.js').Structures.get('NewsChannel');
+const Structures = require('discord.js').Structures;
 const { APIMessage } = require('./APIMessage');
 
-class NewsChannel extends Structures.get("NewsChannel") {
+class ExtendedNewsChannel extends NewsChannel {
     async send(content, options) {
         const User = Structures.get('User');
         const GuildMember = Structures.get('GuildMember');
@@ -29,4 +30,4 @@ class NewsChannel extends Structures.get("NewsChannel") {
     }
 }
 
-module.exports = NewsChannel;
+module.exports = ExtendedNewsChannel;

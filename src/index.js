@@ -5,6 +5,10 @@ version = parseInt(version[0] + version[1]);
 
 module.exports = (client) => {
 
+    const { Events } = require('discord.js').Constants;
+
+    Events.CLICK_BUTTON = 'clickButton';
+
     if (version < 11 || version === 11) {
         throw new Error('The discord.js version must be v12 or high');
     }
@@ -34,8 +38,8 @@ module.exports = (client) => {
         if (!data.message) return;
 
         if (data.data.component_type) {
-            const INTERACTION_CREATE = require('./v12/Classes/INTERACTION_CREATE');
-            const button = new INTERACTION_CREATE(client, data);
+            const MessageComponent = require('./v12/Classes/clickButton');
+            const button = new MessageComponent(client, data);
 
             client.emit('clickButton', button);
         }
@@ -46,4 +50,15 @@ module.exports = (client) => {
 
 module.exports.MessageButton = require(`./v${version}/Classes/MessageButton`);
 module.exports.MessageActionRow = require('./v12/Classes/MessageActionRow');
-module.exports.ButtonInteraction = require('./v12/Classes/INTERACTION_CREATE');
+module.exports.ButtonInteraction = require('./v12/Classes/clickButton');
+module.exports.Message = require(`./v${version}/Classes/Message`);
+module.exports.ButtonCollector = require(`./v${version}/Classes/ButtonCollector`);
+module.exports.APIMessage = require('./v12/Classes/APIMessage').APIMessage;
+module.exports.sendAPICallback = require('./v12/Classes/APIMessage').sendAPICallback;
+module.exports.DMChannel = require('./v12/Classes/DMChannel');
+module.exports.NewsChannel = require('./v12/Classes/NewsChannel');
+module.exports.TextChannel = require('./v12/Classes/TextChannel');
+module.exports.WebhookClient = require('./v12/Classes/WebhookClient');
+module.exports.Util = require('./v12/Util');
+module.exports.Constants = require('./v12/Constants');
+version === 13 ? module.exports.CommandInteraction = require('./v13/Classes/CommandInteraction') : null

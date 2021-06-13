@@ -1,4 +1,4 @@
-const { APIMessage: dAPIMessage } = require("discord.js");
+const { APIMessage: dAPIMessage, MessageEmbed } = require("discord.js");
 const Util = require('../Util');
 const { MessageComponentTypes } = require('../Constants.js');
 const BaseMessageComponent = require('./interfaces/BaseMessageComponent');
@@ -11,7 +11,17 @@ class sendAPICallback extends dAPIMessage {
             return this;
         }
 
+        if (typeof (this.options.content) === 'object') {
+            this.options = this.options.content;
+            this.options.content = null;
+        }
+
         super.resolveData();
+
+        if (this.options.content instanceof MessageEmbed) {
+            this.data.embed = this.options.content;
+            this.data.content = null;
+        }
 
         if (this.options.flags) {
             this.data.flags = parseInt(this.options.flags);
@@ -22,42 +32,52 @@ class sendAPICallback extends dAPIMessage {
         }
 
         let components = [];
+        let hasActionRow = false;
         if (MessageComponentTypes[this.options.type]) {
-            let buttons = [];
+            if (this.options.type === MessageComponentTypes.ACTION_ROW) {
+                components.push({
+                    type: MessageComponentTypes.ACTION_ROW,
+                    components: this.options.components.map(b => BaseMessageComponent.create(Util.resolveButton(b)))
+                });
+                hasActionRow = true;
+            } else {
+                components.push({
+                    type: MessageComponentTypes.ACTION_ROW,
+                    components: [BaseMessageComponent.create(Util.resolveButton(this.options))]
+                });
+            }
+        }
 
-            buttons.push(BaseMessageComponent.create(Util.resolveButton(this.options)));
-            components.push({
-                type: MessageComponentTypes['ACTION_ROW'],
-                components: buttons
-            });
-        } else if (this.options.component) {
+        if (this.options.component) {
 
             if (this.options.component instanceof MessageActionRow) {
                 components.push({
                     type: MessageComponentTypes.ACTION_ROW,
                     components: this.options.component.components.map(b => BaseMessageComponent.create(Util.resolveButton(b)))
-                })
+                });
             } else {
-                let buttons = [];
-                buttons.push(BaseMessageComponent.create(Util.resolveButton(this.options.component)));
                 components.push({
                     type: MessageComponentTypes.ACTION_ROW,
-                    components: buttons
+                    components: [BaseMessageComponent.create(Util.resolveButton(this.options.component))]
                 });
             }
-        } else if (this.options.components) {
+        }
+
+        if (this.options.components) {
 
             if (Array.isArray(this.options.components)) {
-                components.push(...this.options.components.map(c => {
-                    let buttons = [];
+                if (hasActionRow === false) {
+                    components.push(...this.options.components.map(c => {
+                        let buttons = [];
 
-                    buttons.push(...c.components.map(b => BaseMessageComponent.create(Util.resolveButton(b))));
+                        buttons.push(...c.components.map(b => BaseMessageComponent.create(Util.resolveButton(b))));
 
-                    return {
-                        type: MessageComponentTypes.ACTION_ROW,
-                        components: buttons
-                    }
-                }));
+                        return {
+                            type: MessageComponentTypes.ACTION_ROW,
+                            components: buttons
+                        }
+                    }));
+                }
             } else {
                 components.push({
                     type: MessageComponentTypes.ACTION_ROW,
@@ -65,6 +85,22 @@ class sendAPICallback extends dAPIMessage {
                 })
             }
         }
+
+        if (this.options.buttons) {
+            components.push({
+                type: MessageComponentTypes.ACTION_ROW,
+                components: Array.isArray(this.options.buttons) ? this.options.buttons.map(b => BaseMessageComponent.create(Util.resolveButton(b))) : [BaseMessageComponent.create(Util.resolveButton(this.options.buttons))]
+            });
+        }
+
+        if (this.options.button) {
+            components.push({
+                type: MessageComponentTypes.ACTION_ROW,
+                components: Array.isArray(this.options.button) ? this.options.button.map(b => BaseMessageComponent.create(Util.resolveButton(b))) : [BaseMessageComponent.create(Util.resolveButton(this.options.button))]
+            });
+        }
+
+        if (this.options === null && !this.options === undefined) components = [];
 
         if (typeof components.length == 'number') {
             this.data.components = components.length === 0 ? [] : components;
@@ -81,17 +117,33 @@ class APIMessage extends dAPIMessage {
             return this;
         }
 
+        if (typeof (this.options.content) === 'object') {
+            this.options = this.options.content;
+            this.options.content = null;
+        }
+
         super.resolveData();
 
-        let components = [];
-        if (MessageComponentTypes[this.options.type]) {
-            let buttons = [];
+        if (this.options.content instanceof MessageEmbed) {
+            this.data.embed = this.options.content;
+            this.data.content = null;
+        }
 
-            buttons.push(BaseMessageComponent.create(Util.resolveButton(this.options)));
-            components.push({
-                type: MessageComponentTypes['ACTION_ROW'],
-                components: buttons
-            });
+        let components = [];
+        let hasActionRow = false;
+        if (MessageComponentTypes[this.options.type]) {
+            if (this.options.type === MessageComponentTypes.ACTION_ROW) {
+                components.push({
+                    type: MessageComponentTypes.ACTION_ROW,
+                    components: this.options.components.map(b => BaseMessageComponent.create(Util.resolveButton(b)))
+                });
+                hasActionRow = true;
+            } else {
+                components.push({
+                    type: MessageComponentTypes.ACTION_ROW,
+                    components: [BaseMessageComponent.create(Util.resolveButton(this.options))]
+                });
+            }
         }
 
         if (this.options.component) {
@@ -100,13 +152,11 @@ class APIMessage extends dAPIMessage {
                 components.push({
                     type: MessageComponentTypes.ACTION_ROW,
                     components: this.options.component.components.map(b => BaseMessageComponent.create(Util.resolveButton(b)))
-                })
+                });
             } else {
-                let buttons = [];
-                buttons.push(BaseMessageComponent.create(Util.resolveButton(this.options.component)));
                 components.push({
                     type: MessageComponentTypes.ACTION_ROW,
-                    components: buttons
+                    components: [BaseMessageComponent.create(Util.resolveButton(this.options.component))]
                 });
             }
         }
@@ -114,16 +164,18 @@ class APIMessage extends dAPIMessage {
         if (this.options.components) {
 
             if (Array.isArray(this.options.components)) {
-                components.push(...this.options.components.map(c => {
-                    let buttons = [];
+                if (hasActionRow === false) {
+                    components.push(...this.options.components.map(c => {
+                        let buttons = [];
 
-                    buttons.push(...c.components.map(b => BaseMessageComponent.create(Util.resolveButton(b))));
+                        buttons.push(...c.components.map(b => BaseMessageComponent.create(Util.resolveButton(b))));
 
-                    return {
-                        type: MessageComponentTypes.ACTION_ROW,
-                        components: buttons
-                    }
-                }));
+                        return {
+                            type: MessageComponentTypes.ACTION_ROW,
+                            components: buttons
+                        }
+                    }));
+                }
             } else {
                 components.push({
                     type: MessageComponentTypes.ACTION_ROW,
@@ -131,6 +183,22 @@ class APIMessage extends dAPIMessage {
                 })
             }
         }
+
+        if (this.options.buttons) {
+            components.push({
+                type: MessageComponentTypes.ACTION_ROW,
+                components: Array.isArray(this.options.buttons) ? this.options.buttons.map(b => BaseMessageComponent.create(Util.resolveButton(b))) : [BaseMessageComponent.create(Util.resolveButton(this.options.buttons))]
+            });
+        }
+
+        if (this.options.button) {
+            components.push({
+                type: MessageComponentTypes.ACTION_ROW,
+                components: Array.isArray(this.options.button) ? this.options.button.map(b => BaseMessageComponent.create(Util.resolveButton(b))) : [BaseMessageComponent.create(Util.resolveButton(this.options.button))]
+            });
+        }
+
+        if (this.options === null && !this.options === undefined) components = [];
 
         if (typeof components.length == 'number') {
             this.data.components = components.length === 0 ? [] : components;

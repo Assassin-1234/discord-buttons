@@ -1,7 +1,8 @@
-const { Structures } = require("discord.js");
+const DMChannel = require('discord.js').Structures.get('DMChannel');
+const Structures = require('discord.js').Structures;
 const { APIMessage } = require('./APIMessage');
 
-class DMChannel extends Structures.get("DMChannel") {
+class ExtendedDMChannel extends DMChannel {
     async send(content, options) {
         const User = Structures.get('User');
         const GuildMember = Structures.get('GuildMember');
@@ -29,4 +30,4 @@ class DMChannel extends Structures.get("DMChannel") {
     }
 }
 
-module.exports = DMChannel;
+module.exports = ExtendedDMChannel;

@@ -1,7 +1,8 @@
-const { Structures } = require("discord.js");
+const TextChannel = require('discord.js').Structures.get('TextChannel');
+const Structures = require('discord.js').Structures;
 const { APIMessage } = require('./APIMessage');
 
-class TextChannel extends Structures.get("TextChannel") {
+class ExtendedTextChannel extends TextChannel {
     async send(content, options) {
         const User = Structures.get('User');
         const GuildMember = Structures.get('GuildMember');
@@ -29,4 +30,4 @@ class TextChannel extends Structures.get("TextChannel") {
     }
 }
 
-module.exports = TextChannel;
+module.exports = ExtendedTextChannel;

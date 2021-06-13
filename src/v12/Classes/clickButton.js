@@ -2,7 +2,7 @@ const { sendAPICallback } = require('./APIMessage');
 const WebhookClient = require('./WebhookClient');
 const Message = require('./Message');
 
-class ButtonEvent {
+class MessageComponent {
 
     constructor(client, data) {
 
@@ -135,4 +135,4 @@ class ButtonEvent {
     }
 }
 
-module.exports = ButtonEvent;
+module.exports = MessageComponent;
